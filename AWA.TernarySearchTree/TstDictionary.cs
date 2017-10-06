@@ -8,45 +8,38 @@ using System.Collections.Generic;
 
 namespace AWA.TernarySearchTree
 {
+    /// <inheritdoc>
+    ///     <cref></cref>
+    /// </inheritdoc>
     /// <summary>
     /// Represents a collection of keys and values.
     /// </summary>
-    /// <typeparam name="TKey">The type of the keys in the dictionary</typeparam>
-    /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
-    /// <remarks>
-    /// The TstDictionary<TKey, TValue> generic class provides a mapping from 
-    /// a set of keys to a set of values. The class is a wrapper of the 
-    /// TernarySearchTree class and implements the IDictionary interface.
-    /// </remarks>    
     public class TstDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICloneable
     {
-        private TernarySearchTree<TKey, TValue> tree;
+        private TernarySearchTree<TKey, TValue> _tree;
 
         public TstDictionary()
         {           
-            tree = new TernarySearchTree<TKey,TValue>();
+            _tree = new TernarySearchTree<TKey,TValue>();
         }
 
         #region IDictionary<TKey,TValue> Members
 
         public void Add(TKey key, TValue value)
         {
-            tree.Insert(key, value);
+            _tree.Insert(key, value);
         }
 
         public bool ContainsKey(TKey key)
         {
-            return tree.ContainsKey(key);
+            return _tree.ContainsKey(key);
         }
 
-        public ICollection<TKey> Keys
-        {
-            get { return tree.Keys; }
-        }
+        public ICollection<TKey> Keys => _tree.Keys;
 
         public bool Remove(TKey key)
         {
-            return tree.RemoveKeyNode(key);
+            return _tree.RemoveKeyNode(key);
         }
 
         public bool TryGetValue(TKey key, out TValue value)
@@ -54,36 +47,24 @@ namespace AWA.TernarySearchTree
             value = default(TValue);
             try
             {
-                value = tree.GetValue(key);
+                value = _tree.GetValue(key);
                 return true;
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
             return false;
         }
 
-        public ICollection<TValue> Values
-        {
-            get { return tree.Values; }
-        }
+        public ICollection<TValue> Values => _tree.Values;
 
-        public IList<KeyValuePair<TKey, TValue>> KeyValuePairs
-        {
-            get
-            {
-                return tree.TreeKeyValuePairs;
-            }
-        }
+        public IList<KeyValuePair<TKey, TValue>> KeyValuePairs => _tree.TreeKeyValuePairs;
 
         public TValue this[TKey key]
         {
-            get
-            {
-                return tree.GetValue(key);
-            }
-            set
-            {
-                tree.Insert(key, value);
-            }
+            get => _tree.GetValue(key);
+            set => _tree.Insert(key, value);
         }
 
         #endregion
@@ -92,47 +73,37 @@ namespace AWA.TernarySearchTree
 
         public void Add(KeyValuePair<TKey, TValue> item)
         {
-            tree.Insert(item.Key, item.Value);
+            _tree.Insert(item.Key, item.Value);
         }
 
         public void Clear()
         {
-            tree.Clear();
+            _tree.Clear();
         }
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
-            TValue value = tree.GetValue(item.Key);
-            if (value == null) return false;
-            return value.Equals(item.Value);
+            var value = _tree.GetValue(item.Key);
+            return value != null && value.Equals(item.Value);
         }
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            foreach (KeyValuePair<TKey, TValue> item in tree.TreeKeyValuePairs)
+            foreach (var item in _tree.TreeKeyValuePairs)
             {
                 array[arrayIndex++] = item;
             }
         }
 
-        public int Count
-        {
-            get { return tree.TreeKeyValuePairs.Count; }
-        }
+        public int Count => _tree.TreeKeyValuePairs.Count;
 
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
+        public bool IsReadOnly => false;
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
-            if (Contains(item))
-            {
-                tree.RemoveKeyNode(item.Key);
-                return true;
-            }
-            return false;
+            if (!Contains(item)) return false;
+            _tree.RemoveKeyNode(item.Key);
+            return true;
         }
 
         #endregion
@@ -141,7 +112,7 @@ namespace AWA.TernarySearchTree
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            return tree.TreeKeyValuePairs.GetEnumerator();
+            return _tree.TreeKeyValuePairs.GetEnumerator();
         }
 
         #endregion
@@ -150,7 +121,7 @@ namespace AWA.TernarySearchTree
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
 
         #endregion
@@ -159,8 +130,8 @@ namespace AWA.TernarySearchTree
 
         public object Clone()
         {
-            TstDictionary<TKey,TValue> newDictionary = new TstDictionary<TKey, TValue>();
-            newDictionary.tree = (TernarySearchTree<TKey, TValue>)this.tree.Clone();
+            var newDictionary =
+                new TstDictionary<TKey, TValue> {_tree = (TernarySearchTree<TKey, TValue>) _tree.Clone()};
             return newDictionary;
         }
 
@@ -174,7 +145,7 @@ namespace AWA.TernarySearchTree
         /// <returns></returns>
         public bool PartialKeyExists(string keyPart)
         {
-            return tree.ContainsNode(keyPart);
+            return _tree.ContainsNode(keyPart);
         }
 
         /// <summary>
@@ -182,7 +153,7 @@ namespace AWA.TernarySearchTree
         /// </summary>
         public void BalanceSearchTree()
         {
-            tree.BalanceTree();
+            _tree.BalanceTree();
         }
 
         /// <summary>
@@ -192,7 +163,7 @@ namespace AWA.TernarySearchTree
         /// <returns></returns>
         public IList<KeyValuePair<TKey, TValue>> PartialKeyMatch(string keyPattern)
         {
-            return tree.PartialKeySearch(keyPattern);
+            return _tree.PartialKeySearch(keyPattern);
         }
 
         /// <summary>
@@ -203,7 +174,7 @@ namespace AWA.TernarySearchTree
         /// <returns></returns>
         public IList<KeyValuePair<TKey, TValue>> NearSearch(TKey key, int distance)
         {
-            return tree.NearSearch(key, distance);
+            return _tree.NearSearch(key, distance);
         }
 
         /// <summary>
@@ -214,7 +185,7 @@ namespace AWA.TernarySearchTree
         /// <returns></returns>
         public IList<KeyValuePair<TKey, TValue>> NearSearch(string key, int distance)
         {
-            return tree.NearSearch(key, distance);
+            return _tree.NearSearch(key, distance);
         }
 
         #endregion
